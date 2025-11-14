@@ -140,3 +140,8 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
