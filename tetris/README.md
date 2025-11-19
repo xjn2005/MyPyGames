@@ -15,5 +15,5 @@
 - 如果想要分发给自己的同学或者朋友玩：
   1. `git clone https://github.com/xjn2005/MyPyGames.git`
   2. `pip install pyinstaller`
-  3. 在vscode终端敲：`pyinstaller --onefile --windowed tetris.py`即可。  
+  3. 在vscode终端敲：`pyinstaller --onefile --windowed tetris.py`。  
   最终会得到一个dist目录下的exe文件，点开即可。
