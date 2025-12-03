@@ -4,49 +4,8 @@ import json
 import os
 import sys  
 from settings import Setting
+from rank import Ranking
 
-def load_ranking(settings):
-    if not os.path.exists(settings.ranking_file):
-        return []
-    try:
-        with open(settings.ranking_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return []
-
-def save_ranking(new_score, new_name, settings):
-    rankings = load_ranking(settings)
-    rankings.append({"name": new_name, "score": new_score})
-    rankings = sorted(rankings, key=lambda x: -x["score"])[:settings.max_ranking]
-    with open(settings.ranking_file, "w", encoding="utf-8") as f:
-        json.dump(rankings, f, ensure_ascii=False, indent=2)
-
-def get_player_name(screen, font, settings):
-    name = ""
-    input_active = True
-    while input_active:
-        screen.fill(settings.black)
-        prompt_text = font.render("Enter your name (max 6 chars):", True, settings.white)
-        prompt_rect = prompt_text.get_rect(center=(settings.total_screen_width//2, settings.screen_height//2 - 50))
-        screen.blit(prompt_text, prompt_rect)
-        name_text = font.render(name, True, settings.blue)
-        name_rect = name_text.get_rect(center=(settings.total_screen_width//2, settings.screen_height//2))
-        screen.blit(name_text, name_rect)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()  
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN and name.strip():
-                    input_active = False
-                elif event.key == pygame.K_BACKSPACE:
-                    name = name[:-1]
-                elif len(name) < 6 and event.unicode.isalnum():
-                    name = name + event.unicode
-        
-        pygame.display.flip()
-    return name.strip()
 
 class TetrisGame:
     def __init__(self):
@@ -73,6 +32,8 @@ class TetrisGame:
         self.game_over = False
         self.paused = False
         self.menu_state = "main"
+
+        self.ranking = Ranking(self.settings)  
 
         self._init_game_state()
 
@@ -279,7 +240,7 @@ class TetrisGame:
         rank_title = self.font.render("Top 5 Ranking", True, self.settings.blue)
         self.screen.blit(rank_title, (self.settings.total_screen_width//2 - 90, 50))
         
-        rankings = load_ranking(self.settings)
+        rankings = self.ranking.load()
         if not rankings:
             no_rank_text = self.small_font.render("No scores yet!", True, self.settings.gray)
             self.screen.blit(no_rank_text, (self.settings.total_screen_width//2 - 60, self.settings.screen_height//2))
@@ -341,8 +302,8 @@ class TetrisGame:
                         self._init_game_state()
                         self.menu_state = "playing"
                     elif event.key == pygame.K_m:
-                        name = get_player_name(self.screen, self.font, self.settings)
-                        save_ranking(int(self.score), name, self.settings)
+                        name = self.ranking.get_player_name(self.screen, self.font)
+                        self.ranking.save(int(self.score), name)
                         self.menu_state = "main"
                     elif event.key == pygame.K_q:
                         pygame.quit()
