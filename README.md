@@ -56,17 +56,17 @@ python game.py  # 贪吃蛇游戏
 如果你想将游戏打包成可执行文件分发给朋友：
 
 1. 安装打包工具：
-   ```bash
+```bash
 pip install pyinstaller
 ```
 
 2. 打包普通游戏（如俄罗斯方块）：
-   ```bash
+```bash
 pyinstaller --onefile --windowed tetris.py
 ```
 
 3. 打包带有外部资源的游戏（如贪吃蛇）：
-   ```bash
+```bash
 pyinstaller --onefile --windowed --add-data "PressStart2P-Regular.ttf;." game.py
 ```
 
