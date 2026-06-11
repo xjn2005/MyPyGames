@@ -1,51 +1,61 @@
-import pygame
 import json
-import os
-import sys
+from pathlib import Path
+
 
 class Ranking:
-    def __init__(self, settings):
+    def __init__(self, settings, path=None):
         self.settings = settings
-    
+        self.path = (
+            Path(path)
+            if path is not None
+            else Path(__file__).resolve().parent / settings.ranking_file
+        )
+
+    @staticmethod
+    def normalize_name(name):
+        return "".join(character for character in str(name) if character.isalnum())[:6]
+
     def load(self):
-        if not os.path.exists(self.settings.ranking_file):
-            return []
         try:
-            with open(self.settings.ranking_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
+            raw_rankings = json.loads(self.path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, json.JSONDecodeError):
             return []
-    
+
+        if not isinstance(raw_rankings, list):
+            return []
+
+        rankings = []
+        for entry in raw_rankings:
+            if not isinstance(entry, dict):
+                continue
+
+            name = entry.get("name")
+            score = entry.get("score")
+            if not isinstance(name, str) or type(score) is not int:
+                continue
+
+            normalized_name = self.normalize_name(name)
+            if not normalized_name:
+                continue
+            rankings.append({"name": normalized_name, "score": score})
+
+        rankings.sort(key=lambda entry: entry["score"], reverse=True)
+        return rankings[: self.settings.max_ranking]
+
     def save(self, new_score, new_name):
+        name = self.normalize_name(new_name)
+        if not name:
+            raise ValueError("Player name must contain a letter or number.")
+
         rankings = self.load()
-        rankings.append({"name": new_name, "score": new_score})
-        rankings = sorted(rankings, key=lambda x: -x["score"])[:self.settings.max_ranking]
-        with open(self.settings.ranking_file, "w", encoding="utf-8") as f:
-            json.dump(rankings, f, ensure_ascii=False, indent=2)
-    
-    def get_player_name(self, screen, font):
-        name = ""
-        input_active = True
-        while input_active:
-            screen.fill(self.settings.black)
-            prompt_text = font.render("Enter your name (max 6 chars):", True, self.settings.white)
-            prompt_rect = prompt_text.get_rect(center=(self.settings.total_screen_width//2, self.settings.screen_height//2 - 50))
-            screen.blit(prompt_text, prompt_rect)
-            name_text = font.render(name, True, self.settings.blue)
-            name_rect = name_text.get_rect(center=(self.settings.total_screen_width//2, self.settings.screen_height//2))
-            screen.blit(name_text, name_rect)
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()  
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN and name.strip():
-                        input_active = False
-                    elif event.key == pygame.K_BACKSPACE:
-                        name = name[:-1]
-                    elif len(name) < 6 and event.unicode.isalnum():
-                        name = name + event.unicode
-            
-            pygame.display.flip()
-        return name.strip()
+        rankings.append({"name": name, "score": int(new_score)})
+        rankings.sort(key=lambda entry: entry["score"], reverse=True)
+        rankings = rankings[: self.settings.max_ranking]
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path = self.path.with_suffix(f"{self.path.suffix}.tmp")
+        temporary_path.write_text(
+            json.dumps(rankings, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        temporary_path.replace(self.path)
