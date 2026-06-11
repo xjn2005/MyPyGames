@@ -1,57 +1,67 @@
 class Setting:
     def __init__(self):
-        # 基础配置
-        self.screen_width = 300
-        self.screen_height = 600
+        # Game rules
         self.block_size = 30
         self.grid_width = 10
         self.grid_height = 20
         self.fps = 60
-        self.border_padding = 5
-
-        # 等级配置
         self.level_threshold = [0, 1000, 2500, 5000, 10000, 20000]
         self.level_speed = [500, 400, 300, 200, 150, 100]
-
-        # 预览区配置（依赖基础配置，需在基础配置后初始化）
-        self.preview_width = 120
-        self.preview_height = 120
-        self.preview_x = self.screen_width + 20
-        self.preview_y = 50
-        self.preview_padding = 5
-
-        # 排行榜配置
         self.ranking_file = "tetris_ranking.json"
         self.max_ranking = 5
 
-        # 颜色配置
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
-        self.gray = (128, 128, 128)
-        self.light_gray = (200, 200, 200)
-        self.border_color = (255, 255, 255)
-        self.red = (255, 0, 0)
-        self.blue = (0, 100, 255)
-        self.block_colors = [
-            (0, 255, 255),    # I型：青色
-            (255, 255, 0),    # O型：黄色
-            (128, 0, 128),    # T型：紫色
-            (255, 165, 0),    # L型：橙色
-            (0, 0, 255),      # J型：蓝色
-            (0, 255, 0),      # S型：绿色
-            (255, 0, 0)       # Z型：红色
-        ]
-
-        # 方块形状配置
         self.block_shapes = [
-            [[1, 1, 1, 1]],                              # I型
-            [[1, 1], [1, 1]],                             # O型
-            [[0, 1, 0], [1, 1, 1]],                       # T型
-            [[0, 0, 1], [1, 1, 1]],                       # L型
-            [[1, 0, 0], [1, 1, 1]],                       # J型
-            [[0, 1, 1], [1, 1, 0]],                       # S型
-            [[1, 1, 0], [0, 1, 1]]                        # Z型
+            [[1, 1, 1, 1]],
+            [[1, 1], [1, 1]],
+            [[0, 1, 0], [1, 1, 1]],
+            [[0, 0, 1], [1, 1, 1]],
+            [[1, 0, 0], [1, 1, 1]],
+            [[0, 1, 1], [1, 1, 0]],
+            [[1, 1, 0], [0, 1, 1]],
         ]
 
-        # 窗口总宽度（依赖基础配置和预览区配置）
-        self.total_screen_width = self.screen_width + self.preview_width + 40
+        # Layout
+        self.outer_padding = 20
+        self.board_x = 24
+        self.board_y = 20
+        self.board_width = self.grid_width * self.block_size
+        self.board_height = self.grid_height * self.block_size
+        self.sidebar_x = 344
+        self.sidebar_width = 180
+        self.screen_width = self.board_width
+        self.screen_height = 640
+        self.total_screen_width = 548
+        self.card_radius = 14
+        self.card_padding = 16
+
+        # Modern dark palette
+        self.background = (9, 11, 16)
+        self.board_background = (17, 21, 29)
+        self.panel = (23, 28, 38)
+        self.panel_highlight = (31, 38, 51)
+        self.text = (245, 247, 250)
+        self.text_muted = (152, 162, 179)
+        self.accent = (76, 141, 255)
+        self.danger = (255, 93, 104)
+        self.grid_line = (37, 44, 56)
+        self.border = (49, 58, 73)
+        self.overlay = (4, 6, 10, 210)
+
+        self.block_colors = [
+            (79, 209, 197),
+            (246, 200, 95),
+            (167, 139, 250),
+            (245, 158, 91),
+            (91, 143, 249),
+            (92, 203, 138),
+            (241, 109, 122),
+        ]
+
+        # Compatibility aliases for small external integrations.
+        self.black = self.background
+        self.white = self.text
+        self.gray = self.text_muted
+        self.light_gray = self.grid_line
+        self.border_color = self.border
+        self.red = self.danger
+        self.blue = self.accent
