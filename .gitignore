@@ -147,3 +147,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Project generated files
+.superpowers/
+tests/.tmp/
+tetris/tetris_ranking.json
